@@ -1,6 +1,10 @@
 /**
- * Buddhist Era for bootstrap-datepicker.
+ * Buddhist Era for uxsolutions's bootstrap-datepicker
+ * <https://github.com/uxsolutions/bootstrap-datepicker>
+ *
  * @author Zercle Technology Co., Ltd. <info@zercle.org>
+ * @link https://github.com/zercle/bootstrap-datepicker-BE
+ * @version 1.6.4_1
  */
 
 ;(function ($) {
@@ -13,17 +17,28 @@
     , adjYear = 543
     , currentYear = new Date().getFullYear();
 
-  function adjFullYear(v) {
-    var beBound = currentYear - (adjYear / 2);
-    if (v >= beBound) {
-      v -= adjYear;
+  // Transform to BE for display
+  function toBEYear(year) {
+    var beBound = currentYear + (adjYear / 2);
+    if (year >= beBound) {
+      year -= adjYear;
     }
 
-    if (v < beBound - adjYear) {
-      v -= adjYear;
+    if (year < beBound) {
+      year += adjYear;
     }
 
-    return v;
+    return year;
+  }
+
+  // Transform to CE for calculate
+  function toCEYear(year) {
+    var beBound = currentYear + (adjYear / 2);
+    if (year >= beBound) {
+      year -= adjYear;
+    }
+
+    return year;
   }
 
   // Inherit DPGlobal from bootstrap-datepicker
@@ -43,7 +58,7 @@
 
         for (var i = 0, cnt = formats.parts.length; i < cnt; i++) {
           if (~['yyyy', 'yy'].indexOf(formats.parts[i])) {
-            parts[i] = '' + adjFullYear(parseInt(parts[i] - adjYear, 10));
+            parts[i] = '' + toCEYear(parseInt(parts[i], 10));
           }
 
           if (separators.length) {
@@ -65,8 +80,8 @@
       var formats = format
         , parts = childFormatDate && childFormatDate.match(this.nonpunctuation) || []
         , trnfrm = {
-        yy: (adjYear + date.getUTCFullYear()).toString().substring(2)
-        , yyyy: (adjYear + date.getUTCFullYear()).toString()
+        yy: toBEYear(date.getUTCFullYear()).toString().substring(2)
+        , yyyy: toBEYear(date.getUTCFullYear()).toString()
       };
 
       if (typeof formats === 'string') {
@@ -95,11 +110,27 @@
   var _parentDatePicker_ = $.extend({}, DatePicker.prototype);
 
   $.extend(DatePicker.prototype, {
+    fill: function () {
+      var d = new Date(this.viewDate);
+      this.viewDate.setUTCFullYear(toCEYear(d.getUTCFullYear()));
+      _parentDatePicker_.fill.call(this);
+
+      var yearTitle = this.picker.find('.datepicker-months')
+        .find('.datepicker-switch');
+
+      if (parseInt(yearTitle.text()) > 1000) {
+        yearTitle.text(
+          toBEYear(parseInt(yearTitle.text()))
+        );
+      }
+
+      console.log(yearTitle);
+    },
     _fill_yearsView: function (selector, cssClass, factor, step, currentYear, startYear, endYear, callback) {
 
-      currentYear += adjYear;
-      startYear += adjYear;
-      endYear += adjYear;
+      currentYear = toBEYear(currentYear);
+      startYear = toBEYear(startYear);
+      endYear = toBEYear(endYear);
 
       _parentDatePicker_._fill_yearsView.call(this, selector, cssClass, factor, step, currentYear, startYear, endYear, callback);
     }
