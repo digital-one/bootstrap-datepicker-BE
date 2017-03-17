@@ -123,8 +123,6 @@
           toBEYear(parseInt(yearTitle.text()))
         );
       }
-
-      console.log(yearTitle);
     },
     _fill_yearsView: function (selector, cssClass, factor, step, currentYear, startYear, endYear, callback) {
 
